@@ -4,13 +4,27 @@ const app = express(); // create an express application
 
 
 // this will match with get methods only
-app.get('/user', (req, res)=>{
+
+
+app.get('/user/:id/:password', (req, res)=>{
+    console.log(req.query); // this will give the query parameters /http://localhost:3000/user?userID=1001&pass=abc@123
+    console.log(req.params); // this will give the path parameters /http://localhost:3000/user/1001/abc@123
     res.send({
         name: 'John',
         age: 20,
         city: 'New York'
     }); // send a response to the client
 });
+
+
+app.get("/abc", (req, res)=>{
+    res.send({
+        name: 'Abc',
+        age: 120,
+        city: 'xyz'
+    }); // send a response to the client
+});
+
 
 app.post('/user', (req, res)=>{
     res.send('user created'); // send a response to the client
