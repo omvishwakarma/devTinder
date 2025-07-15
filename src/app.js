@@ -1,17 +1,24 @@
 const express = require("express");
 const connectDB = require("./config/database");
 const User = require("./models/user");
+const {validatingSignupData} = require("./utils/validation");
+const bcrypt = require("bcrypt");
 
 const app = express(); // create an express application
 app.use(express.json()); // added middleware to parse the request body
 
 app.post("/signup", async (req, res) => {
-    const data = req.body;
+
+
+    const {firstName, lastName, emailId, age, gender, password, skills} = req.body;
     // allowed fields to update
     const ALLOW_UPDATES = ['firstName', 'lastName', 'age', 'gender', 'password', 'skills'];
+
+    const hashedPassword = await bcrypt.hash(password, 10);
     
   
   try {
+    validatingSignupData(data); // validate the signup data
      // check if the request body is empty
     const isAllowUpdate = Object.keys(data).every(key => ALLOW_UPDATES.includes(key));
     if(!isAllowUpdate){
@@ -21,7 +28,15 @@ app.post("/signup", async (req, res) => {
         // if the skills array is greater than 10, return an error
         return res.status(400).send("Skills should be less than 10");
     }
-    const user = new User(data);
+    const user = new User({
+      firstName,
+      lastName,
+      emailId,
+      age,
+      gender,
+      password: hashedPassword,
+      skills
+    });
     await user.save();
     res.status(200).send("User created successfully"); // send a response to the client
   } catch (error) {
