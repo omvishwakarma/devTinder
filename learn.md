@@ -80,3 +80,42 @@ connectDB().then(()=>{
 }).catch((err)=>{
     console.log('Error connecting to MongoDB', err);
 })
+
+
+document - mongoosejs.com/docs/guide.html
+
+2) Create schema  /models/user'
+
+const mongoose = require('mongoose')
+
+const userSchema = mongoose.Schema({
+    fistName: {
+        type: String,
+    },
+    lastName: {
+        type: String,
+    },
+    emailId:{
+        type: String,
+    },
+    age:{
+        type: String,
+    },
+    gender:{
+        type: String,
+    },
+    password:{
+        type: String,
+    }
+})
+
+
+
+const userModel = mongoose.model('User', userSchema);
+
+module.exports = userModel;
+
+
+-------- 07 - Diving into the API's -------------------------------------
+
+ 
