@@ -59,7 +59,7 @@ app.post("/signup", async (req, res) => {
 app.post("/login", async (req, res) => {
   const {emailId, password} = req.body;
   const user = await User.findOne({emailId});
-  const isPasswordValid = await bcrypt.compare(password, user.password);
+  const isPasswordValid = await user.isValidPassword(password);
   try{
     if(!user){
       return res.status(400).send("Invalid email or password");
