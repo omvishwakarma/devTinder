@@ -62,6 +62,12 @@ const userSchema = mongoose.Schema({
     timestamps: true, // this will add createdAt and updatedAt fields to the schema 
 } )
 
+userSchema.methods.getJWT = async function(){
+    const user = this;
+    const token = await jwt.sign({_id: user._id}, "Dev@Tinder$1301", {expiresIn: "1d"}); // expires in 1 day
+    return token;
+}
+
 
 
 const userModel = mongoose.model('User', userSchema);

@@ -68,7 +68,7 @@ app.post("/login", async (req, res) => {
       return res.status(400).send("Invalid email or password");
     }
     // 
-    const token = await jwt.sign({_id: user._id}, "Dev@Tinder$1301", {expiresIn: "1d"}); // expires in 1 day
+    const token = await user.getJWT(); 
     console.log("token=>", token);
     res.cookie("token", token, { expires: new Date(Date.now() + 1000 * 60 * 60 * 24)}); // expires in 24 hours
     res.status(200).send("login Successful");
