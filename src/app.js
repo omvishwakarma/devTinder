@@ -3,22 +3,31 @@ const connectDB = require("./config/database");
 const User = require("./models/user");
 const {validatingSignupData} = require("./utils/validation");
 const bcrypt = require("bcrypt");
+const cookieParser = require("cookie-parser");
+const jwt = require("jsonwebtoken");
+const userAuth = require("./middlewares/auth");
 
 const app = express(); // create an express application
 app.use(express.json()); // added middleware to parse the request body
+app.use(cookieParser()); // added middleware to parse the cookies
 
 app.post("/signup", async (req, res) => {
 
+  const data = req.body;
 
-    const {firstName, lastName, emailId, age, gender, password, skills} = req.body;
+    const {firstName, lastName, emailId, age, gender, password, skills} = data;
     // allowed fields to update
     const ALLOW_UPDATES = ['firstName', 'lastName', 'age', 'gender', 'password', 'skills'];
 
+
     const hashedPassword = await bcrypt.hash(password, 10);
     
-  
-  try {
-    validatingSignupData(data); // validate the signup data
+    
+    
+    try {
+      validatingSignupData(data); // validate the signup data
+      console.log("hashedPassword=>", hashedPassword, emailId, password);
+    
      // check if the request body is empty
     const isAllowUpdate = Object.keys(data).every(key => ALLOW_UPDATES.includes(key));
     if(!isAllowUpdate){
@@ -28,7 +37,8 @@ app.post("/signup", async (req, res) => {
         // if the skills array is greater than 10, return an error
         return res.status(400).send("Skills should be less than 10");
     }
-    const user = new User({
+    console.log("validated data=>", data );
+    const user =  await User.create({
       firstName,
       lastName,
       emailId,
@@ -37,9 +47,11 @@ app.post("/signup", async (req, res) => {
       password: hashedPassword,
       skills
     });
+    
     await user.save();
     res.status(200).send("User created successfully"); // send a response to the client
   } catch (error) {
+    console.log("error=>", error);
     res.status(400).send("Error saving user=>", error.message);
   }
 });
@@ -55,16 +67,31 @@ app.post("/login", async (req, res) => {
     if(!isPasswordValid){
       return res.status(400).send("Invalid email or password");
     }
-    res.status(200).send("Login successful");
+    // 
+    const token = await jwt.sign({_id: user._id}, "Dev@Tinder$1301");
+    console.log("token=>", token);
+    res.cookie("token", token);
+    res.status(200).send("login Successful");
   }catch(error){
     res.status(400).send("Error logging in=>", error.message);
   }
 });
 
+//profile
+
+app.get("/profile", userAuth, async (req, res) => {
+  const user = req.user;
+  try{
+    res.status(200).send(user);
+  }catch(error){
+    res.status(400).send("Error getting user=>", error.message);
+  }
+
+});
+
 // get a user by id
-app.get("/user", async (req, res) => {
-  const userID = req.body.userId;
-  console.log("userID=>", userID);
+app.get("/user/:userId", async (req, res) => {
+  const userID = req.params.userId;
   try {
     const user = await User.findOne({ _id: userID });
     if(user){
@@ -107,16 +134,6 @@ app.patch("/user", async (req, res) => {
     res.status(200).send("User updated successfully"); // send a response to the client
   } catch (error) {
     res.status(400).send("Error updating user=>", error.message);
-  }
-});
-//find user by email id 
-app.get("/user/:emailId", async (req, res) => {
-  const emailId = req.params.emailId;
-  try {
-    const user = await User.findOne({emailId: emailId});
-    res.status(200).send(user); // send a response to the client
-  } catch (error) {
-    res.status(400).send("Error finding user=>", error.message);
   }
 });
 
