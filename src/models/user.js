@@ -8,12 +8,12 @@ const userSchema = mongoose.Schema({
         type: String,
         required: true,
         minlength: 3,
-        maxlength: 20,
+        maxlength: 20
     },
     lastName: {
         type: String,
         minlength: 3,
-        maxlength: 20,
+        maxlength: 20
     },
     emailId:{
         type: String,
@@ -56,10 +56,7 @@ const userSchema = mongoose.Schema({
     skills:{
         type: [String],
         required: true,
-    },
-    createdAt:{
-        type: Date,
-    },
+    }
 }, {
     timestamps: true, // this will add createdAt and updatedAt fields to the schema 
 } )
