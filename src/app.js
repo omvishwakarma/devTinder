@@ -4,7 +4,7 @@ const cookieParser = require("cookie-parser");
 const authRouter = require("./routes/auth");
 const userRouter = require("./routes/user");
 const profileRouter = require("./routes/profile");
-
+const connectRouter = require("./routes/connect");
 const app = express(); // create an express application
 app.use(express.json()); // added middleware to parse the request body
 app.use(cookieParser()); // added middleware to parse the cookies
@@ -12,6 +12,7 @@ app.use(cookieParser()); // added middleware to parse the cookies
 app.use("/", authRouter); // auth routes
 app.use("/", userRouter); // user routes
 app.use("/", profileRouter); // profile routes
+app.use("/", connectRouter); // connect routes
 
 connectDB()
   .then(() => {
