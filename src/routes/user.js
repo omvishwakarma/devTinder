@@ -30,26 +30,6 @@ userRouter.get("/feed", userAuth, async (req, res) => {
   }
 });
 
-// delete a user by id
-userRouter.delete("/user", userAuth, async (req, res) => {
-  const userID = req.body.userId;
-  try {
-    await User.findOneAndDelete(userID);
-    res.status(200).send("User deleted successfully"); // send a response to the client
-  } catch (error) {
-    res.status(400).send("Error deleting user delete=>" + error.message);
-  }
-});
 
-// update a user by id
-userRouter.patch("/user", userAuth, async (req, res) => {
-  const userID = req.body.userId;
-  try {
-    const user = await User.findOneAndUpdate(userID, req.body);
-    res.status(200).send("User updated successfully"); // send a response to the client
-  } catch (error) {
-    res.status(400).send("Error updating user update=>" + error.message);
-  }
-});
 
 module.exports = userRouter;

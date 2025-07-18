@@ -22,6 +22,25 @@ const validatingSignupData = (data) => {
     
 }
 
+const validateEditProfileData = (data) => {
+    const {firstName, lastName, age, gender, skills} = data
+    if(!validator.isAlpha(firstName)){
+        throw new Error('First name must be a string')
+    }
+    if(!validator.isAlpha(lastName)){
+        throw new Error('Last name must be a string')
+    }
+    if(!validator.isNumeric(age)){
+        throw new Error('Age must be a number')
+    }
+
+    if(!validator.isIn(gender, ['male', 'female', 'other'])){
+        throw new Error('Invalid gender')
+    }
+
+    
+}
+
 module.exports = {
     validatingSignupData
 }
