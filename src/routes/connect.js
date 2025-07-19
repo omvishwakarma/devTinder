@@ -33,7 +33,7 @@ connectRouter.post(
       await connection.save();
       res
         .status(200)
-        .json({ message: "Connection created successfully", data: connection });
+        .json({ message: `${req.user.firstName} sent a request to ${receiver.firstName} with status ${status}`, data: connection });
     } catch (error) {
       console.log("error=>", error);
       res
