@@ -66,7 +66,7 @@ connectRouter.post(
       isConnectionValid.status = status; // update the status of the connection
       await isConnectionValid.save(); // save the connection
       res.status(200).json({
-        message: "Connection updated successfully",
+        message: `${req.user.firstName} ${status} the request`,
         data: isConnectionValid,
       });
     } catch (error) {

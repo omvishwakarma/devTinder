@@ -4,6 +4,8 @@ const userAuth = require("../middlewares/auth");
 const User = require("../models/user");
 const Connection = require("../models/connection");
 
+const SAFE_USER_FIELDS = "firstName lastName age";
+
 // get a user by id
 userRouter.get("user/:userId", userAuth, async (req, res) => {
   const userID = req.params.userId;
@@ -33,23 +35,58 @@ userRouter.get("/feed", userAuth, async (req, res) => {
 });
 
 // get all connections for a user
-userRouter.get("/connections/requests/received", userAuth, async (req, res) => {
+userRouter.get(
+  "/user/connections/requests/received",
+  userAuth,
+  async (req, res) => {
+    const userID = req.user._id;
+    try {
+      const connections = await Connection.find({
+        receiverId: userID,
+        status: "interested",
+      }).populate("senderId", ["firstName", "lastName", "age"]);
+
+      console.log("connections=>", connections);
+
+      return res.status(200).json({
+        message: "Connections received",
+        data: connections,
+      });
+    } catch (error) {
+      console.log("error=>", error);
+      res.status(400).send("Error getting connections=>" + error.message);
+    }
+  }
+);
+
+// get all accepted connections for a user
+userRouter.get("/user/connections", userAuth, async (req, res) => {
   const userID = req.user._id;
   try {
     const connections = await Connection.find({
-      receiverId: userID,
-      status: "interested",
-    }).populate("senderId", ["firstName", "lastName", "age"]);
+      $or: [
+        { senderId: userID, status: "accepted" },
+        { receiverId: userID, status: "accepted" },
+      ],
+    })
+      .populate("senderId", SAFE_USER_FIELDS)
+      .populate("receiverId", SAFE_USER_FIELDS); // populate the sender and receiver ids
 
-    console.log("connections=>", connections);
-
+    const data = connections.map((connection) => {
+      if (connection.senderId._id.toString() === userID.toString()) { // if the sender id is the same as the user id, return the receiver id
+        return connection.receiverId;
+      } else {
+        return connection.senderId;
+      }
+    });
     return res.status(200).json({
-      message: "Connections received",
-      data: connections,
+      message: "Connections accepted",
+      data: data, 
     });
   } catch (error) {
     console.log("error=>", error);
     res.status(400).send("Error getting connections=>" + error.message);
   }
 });
+
 module.exports = userRouter;
