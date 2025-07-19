@@ -5,7 +5,7 @@ const Connection = require("../models/connection");
 const User = require("../models/user");
 
 connectRouter.post(
-  "/connect/:status/:receiverId",
+  "/request/send/:status/:receiverId",
   userAuth,
   async (req, res) => {
     const { status, receiverId } = req.params;
@@ -39,6 +39,41 @@ connectRouter.post(
       res
         .status(400)
         .json({ message: "Error creating connection", error: error.message });
+    }
+  }
+);
+
+connectRouter.post(
+  "/request/review/:status/:requestId",
+  userAuth,
+  async (req, res) => {
+    try {
+      const { requestId, status } = req.params;
+      const allowedStatuses = ["accepted", "rejected"];
+      if (!allowedStatuses.includes(status)) {
+        // check if the status is valid
+        return res.status(400).json({ message: "Invalid status" });
+      }
+      // check if the connection is valid and the receiver is the one who is reviewing the request
+      const isConnectionValid = await Connection.findOne({
+        _id: requestId,
+        receiverId: req.user._id,
+        status: "interested",
+      });
+      if (!isConnectionValid) {
+        return res.status(400).json({ message: "Connection not found" });
+      }
+      isConnectionValid.status = status; // update the status of the connection
+      await isConnectionValid.save(); // save the connection
+      res.status(200).json({
+        message: "Connection updated successfully",
+        data: isConnectionValid,
+      });
+    } catch (error) {
+      console.log("error=>", error);
+      res
+        .status(400)
+        .json({ message: "Error accepting request", error: error.message });
     }
   }
 );
